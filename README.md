@@ -24,7 +24,7 @@ Once that is set up, you should be able to do `npm install` and `npm run dev`. T
 
 # client
 
-The client uses Next.js, but does not leverage server-side features like server actions, API routes, etc. Instead, it setups up a proxy in next.config.ts that connects to the Express app through `http://localhost:5000`. By default the client runs on `http://localhost:3000`. In order to make it work, create a `.env` in the client root with the following variable:
+The client uses Next.js, but does not leverage server-side features like server actions, API routes, etc. Instead, it sets up a proxy in `next.config.ts` that connects to the Express app through `http://localhost:5000`. By default the client runs on `http://localhost:3000`. In order to make it work, create a `.env` in the client root with the following variable:
 
     EXPRESS_URL=http://localhost:5000
 
