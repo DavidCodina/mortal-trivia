@@ -1,0 +1,14 @@
+.embla-progress-bar {
+  animation-name: autoplay-progress;
+  animation-timing-function: linear;
+  animation-iteration-count: 1;
+}
+
+@keyframes autoplay-progress {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(100%, 0, 0);
+  }
+}

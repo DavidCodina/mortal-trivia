@@ -1,0 +1,438 @@
+/* ======================
+    Talwind Import 
+====================== */
+/* The order of sections differs from that of ShadCN's
+default implementation. Plugins and Variants have been 
+moved to the bottom. This follows best practices. */
+
+@import 'tailwindcss';
+/* See here for preflight.css: https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/preflight.css */
+
+/* ======================
+          Theme
+====================== */
+/* Note: ShadCN was initialized with "baseColor": "neutral". 
+If at some point it seems like the other grays are not necessary, it may
+be worth considering removing them from Tailwind completely to increase
+consistency and reduce the number off --color-* variables. This would entail
+removing variants from alert, badge, button, etc. */
+
+/* https://ui.shadcn.com/docs/tailwind-v4 
+Full support for the new @theme directive and @theme inline option. */
+@theme inline {
+  /* Bacgkround Color - <body> color. */
+  --color-background: var(--background);
+  --color-background-light: var(--background-light); /* 🆕 */
+  /* Foreground Color - <body> text color. */
+  --color-foreground: var(--foreground);
+
+  /* Primary Color */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  /* Secondary Color */
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  /* Destructive Color */
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  /* _Success Color */
+  --color-success: var(--success); /* 🆕 */
+  --color-success-foreground: var(--success-foreground); /* 🆕 */
+
+  /* _Info Color */
+  --color-info: var(--info); /* 🆕 */
+  --color-info-foreground: var(--info-foreground); /* 🆕 */
+
+  /* _Warning Color */
+  --color-warning: var(--warning); /* 🆕 */
+  --color-warning-foreground: var(--warning-foreground); /* 🆕 */
+
+  /* Muted Color */
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  /* Border Color: Admittedly, the naming convention is kind of bad. 
+  It would be better if it was --color-default-border. */
+  --color-border: var(--border);
+
+  /* Accent Color */
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  /* ❌ Card Color 
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  */
+
+  /* Sidebar Color */
+  /* Used for bg-sidebar in SidebarProvider, etc. */
+  --color-sidebar: var(--sidebar);
+  /* Used in Sidebar, SidebarMenuButton, SidebarMenuSub, SidebarRail, SidebarSeparator */
+  --color-sidebar-border: var(--sidebar-border);
+  /* Used in SidebarGroupAction, SidebarGroupLabel, SidebarMenuAction, SidebarMenuButton, SidebarMenuSubButton */
+  --color-sidebar-ring: var(--sidebar-ring);
+  /* Used in SidebarGroupAction, SidebarMenuAction, SidebarMenuBadge, SidebarMenuButton, SidebarMenuSubButton */
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  /* Used in SidebarGroupAction, SidebarMenuAction, SidebarMenuButton, SidebarMenuSubButton */
+  --color-sidebar-accent: var(--sidebar-accent);
+  /* Used in Sidebar, SidebarGroupAction, SidebarMenuAction, SidebarMenuBadge, SidebarMenuSubButton  */
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  /* ❌ Removed
+ --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+ --color-sidebar-primary: var(--sidebar-primary); */
+
+  /* Chart Color */
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+
+  /* ❌ Popover Color 
+  There shouldn't be a need for this:
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground); */
+
+  --color-ring: var(--ring);
+
+  /* Input Color 
+  Currently not using this anywhere.*/
+  /* ❌ --color-input: var(--input); */
+
+  /* Font Types */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Radius 
+  Here shadcn is changing the values for Tailwind's default radius classes.
+  Default theme variable reference : https://tailwindcss.com/docs/theme#default-theme-variable-reference
+  I'm not sure that I want to do this because it makes the way Tailwind normally behaves less intuitive.
+  Tailwind defaults:
+
+    --radius-xs: 0.125rem;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+    --radius-4xl: 2rem;
+  */
+
+  /* ❌ Removed:
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px); */
+}
+
+/* ======================
+        :root
+====================== */
+
+:root {
+  /* Background: This is used to create the --color-background above, which then 
+  is used  on the body element below to apply the bg-background class. */
+  --background: rgb(237, 242, 249); /* oklch(1 0 0) */
+  /* Added: Used for cards, nav menu, articles, etc. */
+  --background-light: #fff; /* 🆕 */
+
+  /* Foreground: This is used to create the --color-foreground above, which then 
+  is used on the body element below to apply the text-foreground class. */
+  --foreground: #212529;
+
+  --primary-light: var(--color-indigo-800); /* 🆕 */
+  --primary: var(--primary-light);
+  --primary-foreground: #fff;
+  --primary-soft: var(--color-indigo-50); /* 🆕 */
+
+  /* Secondary */
+  --secondary-light: var(--color-cyan-500); /* 🆕 */
+  --secondary: var(--secondary-light);
+  --secondary-foreground: #fff;
+  --secondary-soft: var(--color-cyan-50); /* 🆕 */
+
+  /* Destructive */
+  --destructive-light: var(--color-rose-500); /* 🆕 */
+  --destructive: var(--destructive-light);
+
+  /* Here the foreground was similar to --destructive. 
+  In components like alerts, the foreground color is used for coloring the text.
+  This means it can't simply be white. However, this pattern is somewhat inconsistent.
+  For example, the default --primary-foreground is an off-white: oklch(0.985 0 0).
+  This means that if we tried to create a primary alert in a manner similar to the 
+  default destructive alert then we'd also run into issues. 
+
+  Ultimately, this is something to be aware of when looking at default destructive variants
+  across different components (i.e., Alert, DropdownMenuItem, etc. In order to maintain consistency, 
+  I've changed this to --background-light, but again the trade-off is that you also have to fix most 
+  destructive variants across the board.
+
+  The bigger issue here is that ShadCN customizations are necessary, but as soon as
+  we begin modifying stuff here and in the components, the components are no longer
+  portable because they're highly dependent on the specifcs of this file. */
+  --destructive-foreground: #fff;
+
+  --destructive-soft: var(--color-rose-50); /* 🆕 */
+
+  /* _Success: The fact that ShadCN has a destructive and not 
+  a success, warning, or info variants seems strange. */
+  --success-light: var(--color-green-500); /* 🆕 */
+  --success: var(--success-light); /* 🆕 */
+  --success-foreground: #fff; /* 🆕 */
+  --success-soft: var(--color-green-50); /* 🆕 */
+
+  --info-light: var(--color-blue-500); /* 🆕 */
+  --info: var(--info-light); /* 🆕 */
+  --info-foreground: #fff; /* 🆕 */
+  --info-soft: var(--color-blue-50); /* 🆕 */
+
+  --warning-light: var(--color-yellow-500); /* 🆕 */
+  --warning: var(--warning-light); /* 🆕 */
+  --warning-foreground: #fff; /* 🆕 */
+  --warning-soft: var(--color-yellow-50); /* 🆕 */
+
+  /* Muted  */
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+
+  /* Accent */
+  --accent: oklch(
+    from var(--background-light) calc(l - 0.075) c h
+  ); /* oklch(0.97 0 0); */
+  --accent-foreground: var(--foreground); /* ??? oklch(0.205 0 0) */
+
+  /* Border: This is used to create --color-border above. 
+  It can then be used to do className="border border-border". 
+  This creates the default border color. It's value is in that
+  it also changes when the mode is dark. However, ShadCN goes one
+  step further and applies `border-border` globally with *, so 
+  we only need to use the `border` class by itself. */
+  --border: var(--color-neutral-300); /* oklch(0.922 0 0) */
+
+  /* ❌ Card 
+  --card: var(--background-light);
+  --card-foreground: var(--foreground);
+  */
+
+  /* Sidebar: Curently, the sidebar's header, footer, group label are set to primary.
+  I also set the ThemeToggle and SidebarTrigger to do something similar.
+  This may not be a good idea, depending on what the primary color is - especially when dark.
+  That said, I'm leaving it for now... */
+
+  --sidebar: var(--background-light);
+  --sidebar-border: var(--border);
+  --sidebar-accent: var(--accent);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  /* ❌ Removed
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  */
+
+  /* ❌ Popover Color Popover 
+  --popover: var(--background-light);
+  --popover-foreground: var(--foreground);
+  */
+
+  /* Input */
+  /* ❌--input: var(--border); */
+
+  /* Ring */
+  --ring: oklch(0.708 0 0); /* ??? */
+
+  /* Radius: this is the base value that is then used to create other radius custom properties.
+  However, I've commented out the radius overwrites, and am just sticking with the Tailwind 
+  defaults for now. This may mean that for some ShadCN generated components, I will need to 
+  tweak them back again. */
+  --radius: 0.625rem;
+
+  /* Chart */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+}
+
+/* ======================
+        .dark
+====================== */
+/* .dark is applied to the <html> element from within ThemeContext.tsx */
+
+.dark {
+  /* Background  */
+  --background: var(--color-slate-900);
+
+  /* Added: Used for cards, nav menu, articles, etc. */
+  --background-light: var(--color-slate-800); /* 🆕 */
+
+  /* Foreground: i.e., text color */
+  --foreground: #fafafa;
+
+  /* Primary */
+  --primary-dark: var(--color-lime-500); /* 🆕 */
+  --primary: var(--primary-dark);
+  --primary-foreground: #fff;
+  --primary-soft: var(--color-lime-50); /* 🆕 */
+
+  /* Secondary */
+  --secondary-dark: var(--color-cyan-500); /* 🆕 */
+  --secondary: var(--secondary-dark);
+  --secondary-foreground: #fff;
+  --secondary-soft: var(--color-cyan-50); /* 🆕 */
+
+  /* Destructive */
+  --destructive-dark: var(--color-rose-500); /* 🆕 */
+  --destructive: var(--destructive-dark);
+  --destructive-foreground: #fff;
+  --destructive-soft: var(--color-rose-50); /* 🆕 */
+
+  /* _Success */
+  --success-dark: var(--color-green-500); /* 🆕 */
+  --success: var(--success-dark); /* 🆕 */
+  --success-foreground: #fff; /* 🆕 */
+  --success-soft: var(--color-green-50); /* 🆕 */
+
+  /* _Info  */
+  --info-light: var(--color-blue-500); /* 🆕 */
+  --info: var(--info-light); /* 🆕 */
+  --info-foreground: #fff; /* 🆕 */
+  --info-soft: var(--color-blue-50); /* 🆕 */
+
+  --warning-light: var(--color-yellow-500); /* 🆕 */
+  --warning: var(--warning-light); /* 🆕 */
+  --warning-foreground: #fff; /* 🆕 */
+  --warning-soft: var(--color-yellow-50); /* 🆕 */
+
+  /* Muted: 
+
+   */
+  --muted: oklch(0.269 0 0);
+
+  /* Used for form field placeholder text.
+  Also for things like buttons with text-muted in a ToggleGroup when not activated.*/
+  --muted-foreground: oklch(0.708 0 0);
+
+  /* Accent */
+  --accent: oklch(from var(--background-light) calc(l + 0.1) c h);
+  --accent-foreground: var(--foreground); /* oklch(0.985 0 0) */
+
+  /* Border */
+  --border: #555;
+
+  /* ❌ Card
+  --card: var(--background-light);
+  --card-foreground: var(--foreground);
+  */
+
+  /* Sidebar */
+  --sidebar: var(--background-light);
+  --sidebar-border: var(--border);
+  --sidebar-accent: var(--accent);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+  /* ❌ Removed
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  */
+
+  /* ❌ Popover 
+  --popover: var(--background-light);
+  --popover-foreground: var(--foreground);
+  */
+
+  /* Input */
+  /* ❌ --input: var(--border); */
+
+  /* Ring */
+  --ring: oklch(0.439 0 0); /* ??? */
+
+  /* Chart */
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+}
+
+/* ======================
+          Base
+====================== */
+/* Be careful when adding anything additional to the base layer. The Tailwind 
+preflight.css does a pretty good job already. If you go setting additional 
+properties here, you may get too accustomed to that behavior when building 
+components and be surprised when migrating those same components to a different 
+project that does not have the additional base styles. For that reason, it's 
+recommended that this not be changed. */
+
+@layer base {
+  * {
+    /* The idea here with border-border is that by simply applying `border` we immediately 
+    get the benefits of different color borders in light/dark mode. */
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* No #root in Next.js */
+}
+
+/* ======================
+      Components
+====================== */
+/* Note: You can also @import '../components/some-file.css' directly into
+the components cascade layer. This would allow you to colocate CSS styles with
+a particular component, while keeping their specificity below that of the 
+Tailwind utility classes. */
+
+/* stroke='${theme('colors.green-500')}' */
+@layer components {
+  @import '../components/Table/index.css';
+
+  /* 
+  This is how Bootstap implements the padding hack trick. It was included for 
+  purposes of demonstration, but ultimately it's better to use Tailwind's aspect-*.
+
+  .ratio { position: relative; width: 100%; }
+
+  .ratio::before { display: block; padding-top: var(--aspect-ratio); content: ''; }
+  .ratio > * { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+  .ratio-1x1 { --aspect-ratio: 100%; }
+  .ratio-4x3 { --aspect-ratio: 75%; }
+  .ratio-16x9 { --aspect-ratio: 56.25%; }
+  .ratio-21x9 { --aspect-ratio: 42.8571428571%; }
+  */
+}
+
+/* ======================
+        Utilities
+====================== */
+/* To add a custom utility in v4.0, use the new @utility directive: */
+
+/* @utility your-class-name {} */
+
+/* ======================
+        Plugins
+====================== */
+
+@plugin 'tailwindcss-animate';
+@plugin '../tw-plugins//placeholderPlugin';
+@plugin '../tw-plugins/readMorePlugin';
+@plugin '../tw-plugins/spinnerPlugin';
+@plugin '../tw-plugins/modalPlugin';
+@plugin '../tw-plugins/listGroupPlugin';
+@plugin '../tw-plugins/paginationPlugin';
+
+/* ======================
+        Variants
+====================== */
+
+@custom-variant dark (&:is(.dark *));

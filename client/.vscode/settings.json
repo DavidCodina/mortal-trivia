@@ -1,0 +1,7 @@
+{
+  // Enables VSCode Tailwind support for clsx(), but doesn't work
+  // indirectly through cn().
+  "tailwindCSS.experimental.classRegex": [
+    ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ]
+}
