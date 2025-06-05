@@ -5,7 +5,6 @@ import { AlertCircle, ClipboardPlus, Ban } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 
-import { useTypedSelector, useActions } from 'redux-store'
 import {
   Alert,
   Button,
@@ -15,29 +14,53 @@ import {
   RadioItemType,
   RadioValue
 } from '@/components'
+import { getRTKQueryErrorMessage } from '@/utils'
+import {
+  useTypedSelector,
+  useGetCategoriesMutation,
+  useGetQuizMutation
+} from '@/redux-store'
 
 /* ========================================================================
 
 ======================================================================== */
 
 export const CreateQuizForm = () => {
-  const { getQuiz, getQuizCategories } = useActions()
+  const [
+    getCategories,
+    {
+      data: categoriesResponse,
+      ///////////////////////////////////////////////////////////////////////////
+      //
+      // ⚠️ Gotcha:
+      //
+      // The error may be SerializedError | FetchBaseQueryError | undefined.
+      // Use the getRTKQueryErrorMessage(error) from utils to systematically
+      // the error message.
+      //
+      // The Express server also sends a code with its errors. Currently, to get that
+      // there is no helper, so you'll need to do it manually as demonstrated in the
+      // useEffect() below.
+      //
+      ///////////////////////////////////////////////////////////////////////////
+      // isError: categoriesIsError,
+      error: categoriesError
+    }
+  ] = useGetCategoriesMutation()
+
+  const [
+    getQuiz,
+    { data: quizResponse, isLoading: quizIsLoading, error: quizError }
+  ] = useGetQuizMutation()
 
   /* ======================
   Global, Local, Derived State
   ====================== */
 
   // Global state
-  const categories = useTypedSelector((state) => state.quiz.categories)
-  // const categoriesPending = useTypedSelector((state) => state.quiz.categoriesPending)
-  const categoriesError = useTypedSelector(
-    (state) => state.quiz.categoriesError
-  )
-  const quizPending = useTypedSelector((state) => state.quiz.quizPending)
-  const quizError = useTypedSelector((state) => state.quiz.quizError)
+  const quiz = quizResponse?.data || null
+  const categories = categoriesResponse?.data || null
 
-  const quiz = useTypedSelector((state) => state.quiz.quiz)
-  const results = useTypedSelector((state) => state.quiz.results)
   const isAudio = useTypedSelector((state) => state.quiz.isAudio)
 
   // Local state
@@ -82,6 +105,17 @@ export const CreateQuizForm = () => {
   ]
 
   /* ======================
+
+  ====================== */
+
+  React.useEffect(() => {
+    // Whenever CreateQuizForm mounts, getCategories() is called again.
+    // It's likely that there is already categories data in quizSlice,
+    // but this gets fresh data.
+    getCategories()
+  }, [getCategories])
+
+  /* ======================
         handleSubmit()
   ====================== */
 
@@ -106,10 +140,23 @@ export const CreateQuizForm = () => {
   /* ======================
       useEffect()
   ====================== */
+  // Handle quizError toast notification.
 
   React.useEffect(() => {
-    if (quizError) {
-      toast.error(quizError)
+    if (!quizError) {
+      return
+    }
+
+    if (
+      'data' in quizError &&
+      quizError.data &&
+      typeof quizError.data === 'object' &&
+      'code' in quizError.data &&
+      quizError.data.code === 'INSUFFICIENT_QUESTIONS'
+    ) {
+      toast.error(getRTKQueryErrorMessage(quizError))
+    } else {
+      toast.error('Unable to get quiz.')
     }
   }, [quizError])
 
@@ -118,7 +165,7 @@ export const CreateQuizForm = () => {
   ====================== */
 
   React.useEffect(() => {
-    if (!isAudio || quiz || results) {
+    if (!isAudio || quiz) {
       return
     }
 
@@ -127,7 +174,7 @@ export const CreateQuizForm = () => {
     audio.play().catch((_err) => {
       // console.error('Failed to play get-over-here.mp3', err)
     })
-  }, [quiz, results, isAudio])
+  }, [quiz, isAudio])
 
   /* ======================
         renderForm()
@@ -143,7 +190,7 @@ export const CreateQuizForm = () => {
             <Button
               className='self-center'
               onClick={() => {
-                getQuizCategories()
+                getCategories()
               }}
               size='xs'
               title='Get Quiz Categories'
@@ -155,24 +202,13 @@ export const CreateQuizForm = () => {
           title='Error'
           variant='destructive'
         >
-          {categoriesError}
+          {/* {getRTKQueryErrorMessage(categoriesError)} */}
+          Unable to get quiz categories
         </Alert>
       )
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    //
-    // categoriesPending is set to false by default.
-    // It's only set to true when getCategories() is dispatched.
-    // In development, if you refresh the page, you won't IMMEDIATELY see loading UI.
-    // However, that's not the case in production. That said, if you really want to
-    // mitigate the issue, you can also add a `categories === null` check here.
-    // This works because categories will not be null unless it's pending or there's an error
-    // - assuming we've called getCategories() at this point.
-    //
-    ///////////////////////////////////////////////////////////////////////////
-
-    // if (categoriesPending || categories === null) {
+    // if (categoriesLoading || categories === null) {
     //   return (
     //     <div className='text-primary text-center text-4xl font-black'>
     //       Loading...
@@ -259,7 +295,7 @@ export const CreateQuizForm = () => {
                 Submit Button
           ===================== */}
 
-          {quizPending ? (
+          {quizIsLoading ? (
             <Button
               className='flex w-full'
               loading={true}

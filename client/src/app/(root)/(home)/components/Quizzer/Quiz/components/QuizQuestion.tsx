@@ -23,7 +23,6 @@ export const QuizQuestion = ({
   userAnswer
 }: QuizQuestionProps) => {
   const results = useTypedSelector((state) => state.quiz.results)
-  const resultsPending = useTypedSelector((state) => state.quiz.resultsPending)
 
   // The specific result for the particular question.
   const currentResult =
@@ -67,10 +66,6 @@ export const QuizQuestion = ({
                   'bg-success/10 border-success text-success'
               )}
               onClick={() => {
-                if (results || resultsPending) {
-                  //toast.error('Answers are final after submission!')
-                  return
-                }
                 onClick({
                   question_id: question._id,
                   user_answer: answer

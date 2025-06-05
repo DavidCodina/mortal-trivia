@@ -13,7 +13,12 @@ import {
 
 import { Alert, Button } from '@/components'
 import { decodeHtmlEntities } from '@/utils'
-import { useTypedSelector, useActions } from 'redux-store'
+import {
+  useTypedSelector,
+  useActions,
+  useGetQuizResultsMutation
+} from '@/redux-store'
+
 import { QuizQuestion } from './components'
 import { QuizUserAnswer } from '@/types'
 
@@ -22,21 +27,28 @@ import { QuizUserAnswer } from '@/types'
 ======================================================================== */
 
 export const Quiz = () => {
-  const { getQuizResults, setUserAnswers, resetQuiz } = useActions()
+  const { setUserAnswers, resetQuiz } = useActions()
 
   /* ======================
   Global, Local, Derived State
   ====================== */
 
   // Global state
-  // const quizError = useTypedSelector((state) => state.quiz.quizError)
-  // const quizPending = useTypedSelector((state) => state.quiz.quizPending)
   const quiz = useTypedSelector((state) => state.quiz.quiz)
   const quizLength = Array.isArray(quiz) ? quiz.length : 0
 
-  const resultsError = useTypedSelector((state) => state.quiz.resultsError)
-  const resultsPending = useTypedSelector((state) => state.quiz.resultsPending)
-  const results = useTypedSelector((state) => state.quiz.results)
+  const [
+    getQuizResults,
+    {
+      data: resultsResponse,
+      isLoading: resultsLoading,
+      isError: isResultsError,
+      isSuccess: isResultsSuccess
+      // error: resultsError
+    }
+  ] = useGetQuizResultsMutation()
+
+  const results = resultsResponse?.data || null
 
   const isAudio = useTypedSelector((state) => state.quiz.isAudio)
 
@@ -77,10 +89,11 @@ export const Quiz = () => {
   ====================== */
 
   React.useEffect(() => {
-    if (resultsError) {
-      toast.error(resultsError)
+    //# Update the toast so that it has a try again action...
+    if (isResultsError) {
+      toast.error('Unable to get quiz results.')
     }
-  }, [resultsError])
+  }, [isResultsError])
 
   /* ======================
   useEffect() for quiz initialization
@@ -280,7 +293,13 @@ export const Quiz = () => {
                 <QuizQuestion
                   userAnswer={userAnswer}
                   key={index}
-                  onClick={updateUserAnswers}
+                  onClick={(userAnswer) => {
+                    if (isResultsSuccess || isResultsError || resultsLoading) {
+                      return
+                    }
+
+                    updateUserAnswers(userAnswer)
+                  }}
                   question={question}
                 />
               )
@@ -289,13 +308,13 @@ export const Quiz = () => {
             {showSubmitButton && !results && (
               <Button
                 leftSection={<ClipboardCheck />}
-                loading={resultsPending}
+                loading={resultsLoading}
                 size='sm'
                 className='flex w-full'
                 variant='primary'
                 onClick={handleSubmit}
               >
-                {resultsPending ? 'SUBMITTING...' : 'SUBMIT QUIZ'}
+                {resultsLoading ? 'SUBMITTING...' : 'SUBMIT QUIZ'}
               </Button>
             )}
 
