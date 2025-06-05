@@ -29,3 +29,7 @@ The client uses Next.js, but does not leverage server-side features like server 
     EXPRESS_URL=http://localhost:5000
 
 See the `client/sample.env`. Then just run `npm install` and `npm run dev`.
+
+## rtk-query branch
+
+There's also an `rtk-query` branch that replaces the Redux thunks with mutation functions, while still leveraging the `quizSlice`. This version is actually cleaner than the original, albeit more complex in some regards. All the same set up instructions apply.
