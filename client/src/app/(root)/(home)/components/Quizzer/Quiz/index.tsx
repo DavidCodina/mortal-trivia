@@ -16,7 +16,9 @@ import { decodeHtmlEntities } from '@/utils'
 import {
   useTypedSelector,
   useActions,
-  useGetQuizResultsMutation
+  useLazyGetQuizResultsQuery,
+  selectQuizData
+  // quizApi
 } from '@/redux-store'
 
 import { QuizQuestion } from './components'
@@ -34,7 +36,8 @@ export const Quiz = () => {
   ====================== */
 
   // Global state
-  const quiz = useTypedSelector((state) => state.quiz.quiz)
+  const quiz = useTypedSelector(selectQuizData)
+
   const quizLength = Array.isArray(quiz) ? quiz.length : 0
 
   const [
@@ -44,9 +47,10 @@ export const Quiz = () => {
       isLoading: resultsLoading,
       isError: isResultsError,
       isSuccess: isResultsSuccess
+      // reset
       // error: resultsError
     }
-  ] = useGetQuizResultsMutation()
+  ] = useLazyGetQuizResultsQuery()
 
   const results = resultsResponse?.data || null
 
@@ -82,6 +86,14 @@ export const Quiz = () => {
   const handleSubmit = () => {
     setUserAnswers(localUserAnswers)
     getQuizResults(localUserAnswers)
+  }
+
+  /* ======================
+      handleResetQuize()
+  ====================== */
+
+  const handleResetQuiz = () => {
+    resetQuiz()
   }
 
   /* ======================
@@ -200,7 +212,7 @@ export const Quiz = () => {
           <Button
             className='self-center'
             onClick={() => {
-              resetQuiz()
+              handleResetQuiz()
             }}
             size='xs'
             variant={
@@ -250,7 +262,7 @@ export const Quiz = () => {
               <Button
                 className='self-center'
                 onClick={() => {
-                  resetQuiz()
+                  handleResetQuiz()
                 }}
                 size='xs'
                 variant='destructive'
@@ -325,7 +337,7 @@ export const Quiz = () => {
                   className='flex w-full'
                   variant='primary'
                   onClick={() => {
-                    resetQuiz()
+                    handleResetQuiz()
                   }}
                   title='Reset Quiz'
                 >
@@ -338,7 +350,7 @@ export const Quiz = () => {
               <button
                 className='border-primary text-primary hover:bg-primary/10 flex cursor-pointer items-center justify-center border-r px-2 py-1'
                 onClick={() => {
-                  resetQuiz()
+                  handleResetQuiz()
                 }}
                 style={{ minHeight: 32 }}
                 title='Create A New Quiz'

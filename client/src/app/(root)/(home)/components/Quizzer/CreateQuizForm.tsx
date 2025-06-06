@@ -17,41 +17,40 @@ import {
 import { getRTKQueryErrorMessage } from '@/utils'
 import {
   useTypedSelector,
-  useGetCategoriesMutation,
-  useGetQuizMutation
+  useGetCategoriesQuery,
+  useLazyGetQuizQuery
 } from '@/redux-store'
 
 /* ========================================================================
 
 ======================================================================== */
+//! The audio is glitching out. Different final audio, possibly indicating multiple cases.
 
 export const CreateQuizForm = () => {
-  const [
-    getCategories,
-    {
-      data: categoriesResponse,
-      ///////////////////////////////////////////////////////////////////////////
-      //
-      // ⚠️ Gotcha:
-      //
-      // The error may be SerializedError | FetchBaseQueryError | undefined.
-      // Use the getRTKQueryErrorMessage(error) from utils to systematically
-      // the error message.
-      //
-      // The Express server also sends a code with its errors. Currently, to get that
-      // there is no helper, so you'll need to do it manually as demonstrated in the
-      // useEffect() below.
-      //
-      ///////////////////////////////////////////////////////////////////////////
-      // isError: categoriesIsError,
-      error: categoriesError
-    }
-  ] = useGetCategoriesMutation()
+  const {
+    data: categoriesResponse,
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    // ⚠️ Gotcha:
+    //
+    // The error may be SerializedError | FetchBaseQueryError | undefined.
+    // Use the getRTKQueryErrorMessage(error) from utils to systematically
+    // the error message.
+    //
+    // The Express server also sends a code with its errors. Currently, to get that
+    // there is no helper, so you'll need to do it manually as demonstrated in the
+    // useEffect() below.
+    //
+    ///////////////////////////////////////////////////////////////////////////
+    // isError: categoriesIsError,
+    error: categoriesError,
+    refetch: refetchCategories
+  } = useGetCategoriesQuery()
 
   const [
     getQuiz,
     { data: quizResponse, isLoading: quizIsLoading, error: quizError }
-  ] = useGetQuizMutation()
+  ] = useLazyGetQuizQuery()
 
   /* ======================
   Global, Local, Derived State
@@ -103,17 +102,6 @@ export const CreateQuizForm = () => {
       ? [{ label: 'Too Many (dev only)', value: '51' }]
       : [])
   ]
-
-  /* ======================
-
-  ====================== */
-
-  React.useEffect(() => {
-    // Whenever CreateQuizForm mounts, getCategories() is called again.
-    // It's likely that there is already categories data in quizSlice,
-    // but this gets fresh data.
-    getCategories()
-  }, [getCategories])
 
   /* ======================
         handleSubmit()
@@ -190,7 +178,7 @@ export const CreateQuizForm = () => {
             <Button
               className='self-center'
               onClick={() => {
-                getCategories()
+                refetchCategories()
               }}
               size='xs'
               title='Get Quiz Categories'

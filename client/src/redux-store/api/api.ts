@@ -12,6 +12,6 @@ export const api = createApi({
   }),
   // refetchOnFocus: true,
   refetchOnReconnect: true,
-  tagTypes: ['Categories'],
+  tagTypes: ['Categories', 'Quiz', 'QuizResults'],
   endpoints: (_builder) => ({})
 })

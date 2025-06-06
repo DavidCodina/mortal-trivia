@@ -1,25 +1,19 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import {
-  QuizUserAnswer,
-  QuizResults,
-  QuizQuestion,
-  QuizCategory
-} from '@/types'
+  createSlice,
+  PayloadAction,
+  createListenerMiddleware
+} from '@reduxjs/toolkit'
+import { QuizUserAnswer } from '@/types'
+
+import { /* quizApi, RootState, */ api } from '@/redux-store'
 
 type QuizState = {
-  categories: QuizCategory[] | null
   userAnswers: QuizUserAnswer[] | null
   isAudio: boolean
-
-  quiz: QuizQuestion[] | null
-  results: QuizResults | null
 }
 
 const initialState: QuizState = {
-  categories: null,
-  quiz: null,
   userAnswers: null,
-  results: null,
   isAudio: false
 }
 
@@ -34,26 +28,12 @@ export const quizSlice = createSlice({
   initialState,
 
   reducers: {
-    setCategories: (state, action: PayloadAction<QuizCategory[]>) => {
-      state.categories = action.payload
-    },
-
-    setQuiz: (state, action: PayloadAction<QuizQuestion[]>) => {
-      state.quiz = action.payload
-    },
-
     setUserAnswers: (state, action: PayloadAction<QuizUserAnswer[]>) => {
       state.userAnswers = action.payload
     },
 
-    setResults: (state, action: PayloadAction<QuizResults>) => {
-      state.results = action.payload
-    },
-
     resetQuiz: (state) => {
-      state.quiz = null
       state.userAnswers = null
-      state.results = null
     },
 
     toggleIsAudio: (state) => {
@@ -67,3 +47,52 @@ export const quizSlice = createSlice({
 export const quizActions = quizSlice.actions
 export const quizReducer = quizSlice.reducer
 export const quizThunks = {}
+
+const quizListenerMiddleware = createListenerMiddleware()
+
+quizListenerMiddleware.startListening({
+  actionCreator: quizActions.resetQuiz,
+  effect: async (_action, listenerApi) => {
+    // const beforeState = listenerApi.getState() as RootState
+    // console.log('\nbeforeQueries: ', beforeState.api.queries)
+    const dispatch = listenerApi.dispatch
+
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    // Initially, I tried doing this:
+    //
+    //   listenerApi.dispatch(quizApi.util.invalidateTags([ 'Quiz', 'QuizResults']))
+    //
+    // While it seems like that should work, it doesn't. The 'current-results' cache
+    // associated to the 'QuizResults' tag is not removed. In Quiz.index.tsx, we implement
+    //
+    //   const [getQuizResults, { ... }] = useLazyGetQuizResultsQuery()
+    //
+    // In theory, getQuizResults() should ONLY run when we manually call getQuizResults(localUserAnswers).
+    // However, something about invalidating the cache in conjunction causes RTKQ to think it needs to refetch,
+    // which is absolutely unexpected. The local solution is to call reset() 👈🏻 + resetQuiz() in handleResetQuiz().
+    // However, another approach is to forciblye remove the caches here, rather than merely invalidating them.
+    //
+    // The other option is to call listenerApi.dispatch(quizApi.util.resetApiState()), but that's
+    // going to remove the entire cache, which is not necessarily what we want.
+    //
+    ///////////////////////////////////////////////////////////////////////////
+
+    dispatch(
+      api.internalActions.removeQueryResult({
+        queryCacheKey: ['current-quiz'] as any
+      })
+    )
+
+    dispatch(
+      api.internalActions.removeQueryResult({
+        queryCacheKey: ['current-results'] as any
+      })
+    )
+
+    // const afterState = listenerApi.getState() as RootState
+    // console.log('\nafterQueries: ', afterState.api.queries)
+  }
+})
+
+export { quizListenerMiddleware }

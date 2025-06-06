@@ -13,7 +13,13 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import { api } from './api'
 // import { createLogger } from 'redux-logger'
-import { quizReducer, quizActions, quizThunks } from './slices'
+
+import {
+  quizReducer,
+  quizActions,
+  quizThunks,
+  quizListenerMiddleware
+} from './slices'
 
 /* ======================
     logger middleware
@@ -50,7 +56,10 @@ export const store = configureStore({
   // See middleware tutorial for more info:
   // https://www.youtube.com/watch?v=dUVXHMHJio0&list=PLC3y8-rFHvwiaOAuTtVXittwybYIorRB3&index=22
   middleware: (getDefaultMiddleware) => {
-    return getDefaultMiddleware().concat(/* logger, */ api.middleware)
+    return getDefaultMiddleware().concat(
+      quizListenerMiddleware.middleware,
+      /* logger, */ api.middleware
+    )
   }
 })
 

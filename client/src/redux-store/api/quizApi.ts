@@ -1,7 +1,6 @@
 // import { createSelector } from '@reduxjs/toolkit'
 import { api } from './api'
-
-import { quizSlice } from '../slices'
+import { RootState } from '@/redux-store'
 import {
   QuizCategory,
   QuizQuestion,
@@ -32,28 +31,38 @@ type GetQuizResultsResponse = ResBody<GetQuizResultsData>
 
 export const quizApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    getCategories: builder.mutation<GetCategoriesResponse, GetCategoriesArg>({
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    // Previously, I was using mutations, then dipatching the result to state
+    // in the quizSlice for all three functions. This solution worked, but it
+    // didn't really feel idiomatic to RTKQ.
+    //
+    //   getCategories: builder.mutation<GetCategoriesResponse, GetCategoriesArg>({
+    //     query: () => { return { url: '/categories' }},
+    //     async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+    //       try {
+    //         const { data } = await queryFulfilled
+    //         if (data.data !== null) { dispatch(quizSlice.actions.setCategories(data.data)) }
+    //       } catch (_err) {}
+    //     }
+    //   }),
+    //
+    // The challenge with RTKQ is that any query that has args then gets cached with a query
+    // key that uses those args. This makes retrieval slightly more complicated. However, there
+    // are workarounds to achieve static cache keys, which I've now solved for...
+    //
+    ///////////////////////////////////////////////////////////////////////////
+    getCategories: builder.query<GetCategoriesResponse, GetCategoriesArg>({
       query: () => {
         return {
           url: '/categories'
         }
       },
-
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled
-          // Store the results directly in your quiz slice
-          if (data.data !== null) {
-            // console.log('setting categories in quizSlice...')
-            dispatch(quizSlice.actions.setCategories(data.data))
-          }
-        } catch (_err) {
-          // Handle error
-        }
-      }
+      providesTags: ['Categories'],
+      keepUnusedDataFor: Infinity
     }),
 
-    getQuiz: builder.mutation<GetQuizResponse, GetQuizArg>({
+    getQuiz: builder.query<GetQuizResponse, GetQuizArg>({
       query: (arg) => {
         const params = Object.entries({
           amount:
@@ -74,54 +83,57 @@ export const quizApi = api.injectEndpoints({
           url: `/quiz?${queryString}`
         }
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled
-          // Store the results directly in your quiz slice
-          if (data.data !== null) {
-            // console.log('setting quiz in quizSlice...')
-            dispatch(quizSlice.actions.setQuiz(data.data))
-          }
-        } catch (_err) {
-          // Handle error
-        }
-      }
+      providesTags: ['Quiz'],
+      keepUnusedDataFor: Infinity,
+      ///////////////////////////////////////////////////////////////////////////
+      //
+      // ⚠️ serializeQueryArgs: () => 'current-quiz' makes ALL quiz requests use the same cache key
+      // regardless of different parameters (amount, category, difficulty). This allows us to select
+      // the quiz without actually knowing the original arguments (i.e., normally the serialized args
+      //  are used to contruct the cache key).
+      //
+      //   export const selectQuizData = (state: RootState) => quizApi.endpoints.getQuiz.select('current-quiz' as any)(state).data?.data
+      //   const quiz = useTypedSelector(selectQuizData)
+      //
+      // The downside of serialized args for cache keys is that we have to always know what the args are.
+      // That's why it's easier to just use a static cache key. On the other hand, a static key can
+      // lead to cache results stacking up if we don't carefully manage cache invalidation and/or
+      // the more aggressive (and effective) removeQueryResult() method. This is managed in a side-effect
+      // within the quizSlice's quizListenerMiddleware.
+      //
+      ///////////////////////////////////////////////////////////////////////////
+      serializeQueryArgs: () => 'current-quiz'
     }),
 
-    // Initially, I tried to cache the results by making this a builder.query.
-    // However, that makes it very difficult to access the cache again, because
-    // you need the original arguments. This is more of a hybrid approach where
-    // we have a mutator function but it also injects the result into the quizSlice.
-    getQuizResults: builder.mutation<GetQuizResultsResponse, GetQuizResultsArg>(
-      {
-        query: (arg) => {
-          return {
-            url: '/quiz/score',
-            method: 'POST',
-            body: { user_answers: arg }
-          }
-        },
-
-        async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-          try {
-            const { data } = await queryFulfilled
-            // Store the results directly in your quiz slice
-
-            if (data.data !== null) {
-              // console.log('setting results in quizSlice...')
-              dispatch(quizSlice.actions.setResults(data.data))
-            }
-          } catch (_err) {
-            // Handle error
-          }
+    getQuizResults: builder.query<GetQuizResultsResponse, GetQuizResultsArg>({
+      query: (arg) => {
+        return {
+          url: '/quiz/score',
+          method: 'POST',
+          body: { user_answers: arg }
         }
-      }
-    )
+      },
+
+      providesTags: ['QuizResults'],
+      serializeQueryArgs: () => 'current-results'
+    })
   })
 })
 
+// createSelector is sometimes used in these kinds of selectors, but it's not necessary.
+// In fact, it will likely diminish performance in simple use cases like this.
+export const selectQuizData = (state: RootState) =>
+  quizApi.endpoints.getQuiz.select('current-quiz' as any)(state).data?.data
+
+export const selectQuizResultsData = (state: RootState) =>
+  quizApi.endpoints.getQuizResults.select('current-results' as any)(state).data
+    ?.data
+
 export const {
-  useGetCategoriesMutation,
-  useGetQuizMutation,
-  useGetQuizResultsMutation
+  useGetCategoriesQuery,
+  useLazyGetCategoriesQuery,
+  useGetQuizQuery,
+  useLazyGetQuizQuery,
+  useGetQuizResultsQuery,
+  useLazyGetQuizResultsQuery
 } = quizApi

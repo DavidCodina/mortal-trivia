@@ -6,6 +6,7 @@ import { Volume, VolumeX } from 'lucide-react'
 import { useTypedSelector, useActions } from '@/redux-store'
 import { CreateQuizForm } from './CreateQuizForm'
 import { Quiz } from './Quiz'
+import { useGetCategoriesQuery, selectQuizData } from '@/redux-store'
 
 /* ========================================================================
 
@@ -13,8 +14,10 @@ import { Quiz } from './Quiz'
 
 export const Quizzer = () => {
   const { toggleIsAudio } = useActions()
-  const quiz = useTypedSelector((state) => state.quiz.quiz)
+  const quiz = useTypedSelector(selectQuizData)
   const isAudio = useTypedSelector((state) => state.quiz.isAudio)
+
+  const _useGetCategoriesQueryResult = useGetCategoriesQuery()
 
   /* ======================
           return
