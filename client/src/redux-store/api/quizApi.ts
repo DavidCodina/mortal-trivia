@@ -93,7 +93,7 @@ export const quizApi = api.injectEndpoints({
       //  are used to contruct the cache key).
       //
       //   export const selectQuizData = (state: RootState) => quizApi.endpoints.getQuiz.select('current-quiz' as any)(state).data?.data
-      //   const quiz = useTypedSelector(selectQuizData)
+      //   const quiz = useAppSelector(selectQuizData)
       //
       // The downside of serialized args for cache keys is that we have to always know what the args are.
       // That's why it's easier to just use a static cache key. On the other hand, a static key can

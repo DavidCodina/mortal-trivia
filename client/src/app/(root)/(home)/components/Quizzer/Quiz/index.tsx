@@ -13,9 +13,8 @@ import {
 
 import { Alert, Button } from '@/components'
 import { decodeHtmlEntities } from '@/utils'
+import { useAppSelector, useBoundActions } from '@/hooks'
 import {
-  useTypedSelector,
-  useActions,
   useLazyGetQuizResultsQuery,
   selectQuizData
   // quizApi
@@ -29,14 +28,14 @@ import { QuizUserAnswer } from '@/types'
 ======================================================================== */
 
 export const Quiz = () => {
-  const { setUserAnswers, resetQuiz } = useActions()
+  const { setUserAnswers, resetQuiz } = useBoundActions()
 
   /* ======================
   Global, Local, Derived State
   ====================== */
 
   // Global state
-  const quiz = useTypedSelector(selectQuizData)
+  const quiz = useAppSelector(selectQuizData)
 
   const quizLength = Array.isArray(quiz) ? quiz.length : 0
 
@@ -54,7 +53,7 @@ export const Quiz = () => {
 
   const results = resultsResponse?.data || null
 
-  const isAudio = useTypedSelector((state) => state.quiz.isAudio)
+  const isAudio = useAppSelector((state) => state.quiz.isAudio)
 
   // Local state
   const [localUserAnswers, setLocalUserAnswers] = React.useState<

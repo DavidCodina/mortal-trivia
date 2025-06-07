@@ -3,7 +3,8 @@
 import * as React from 'react'
 
 import { cn } from '@/utils'
-import { useTypedSelector, selectQuizResultsData } from '@/redux-store'
+import { useAppSelector } from '@/hooks'
+import { selectQuizResultsData } from '@/redux-store'
 import { decodeHtmlEntities } from '@/utils'
 import { QuizQuestion as QuizQuestionType, QuizUserAnswer } from '@/types'
 
@@ -22,7 +23,7 @@ export const QuizQuestion = ({
   question,
   userAnswer
 }: QuizQuestionProps) => {
-  const results = useTypedSelector(selectQuizResultsData)
+  const results = useAppSelector(selectQuizResultsData)
 
   // The specific result for the particular question.
   const currentResult =

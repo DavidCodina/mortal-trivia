@@ -15,16 +15,13 @@ import {
   RadioValue
 } from '@/components'
 import { getRTKQueryErrorMessage } from '@/utils'
-import {
-  useTypedSelector,
-  useGetCategoriesQuery,
-  useLazyGetQuizQuery
-} from '@/redux-store'
+import { useAppSelector } from '@/hooks'
+
+import { useGetCategoriesQuery, useLazyGetQuizQuery } from '@/redux-store'
 
 /* ========================================================================
 
 ======================================================================== */
-//! The audio is glitching out. Different final audio, possibly indicating multiple cases.
 
 export const CreateQuizForm = () => {
   const {
@@ -60,7 +57,7 @@ export const CreateQuizForm = () => {
   const quiz = quizResponse?.data || null
   const categories = categoriesResponse?.data || null
 
-  const isAudio = useTypedSelector((state) => state.quiz.isAudio)
+  const isAudio = useAppSelector((state) => state.quiz.isAudio)
 
   // Local state
   const [category, setCategory] = React.useState<ReactSelectOption | null>(null)
@@ -272,6 +269,7 @@ export const CreateQuizForm = () => {
           <RadioGroup
             items={amountOptions}
             label='Amount'
+            labelRequired
             name='amount-radios'
             onChange={(value) => {
               setAmount(value)

@@ -1,203 +1,89 @@
 'use client'
 
-import { bindActionCreators, Action } from 'redux'
-import {
-  configureStore,
-  AsyncThunk,
-  ThunkDispatch,
-  PayloadAction,
-  SerializedError
-} from '@reduxjs/toolkit'
-import { setupListeners } from '@reduxjs/toolkit/query'
-import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
-
+import { configureStore } from '@reduxjs/toolkit'
 import { api } from './api'
+import { quizReducer, quizListenerMiddleware } from './slices'
+
 // import { createLogger } from 'redux-logger'
-
-import {
-  quizReducer,
-  quizActions,
-  quizThunks,
-  quizListenerMiddleware
-} from './slices'
-
-/* ======================
-    logger middleware
-====================== */
-
 // const logger = createLogger() // Useful but a lot of noise.
 
 /* ======================
-      actionCreators
+      makeStore()
 ====================== */
-// Export all actions from each slice. For example:
-// export const contactActions = contactSlice.actions;
-// Then import them here, and spread them into a single actionCreators object,
-// which will then be passed into bindActionCreators().
-
-const actionCreators = {
-  ...quizActions
-}
-
-const asyncThunks = {
-  ...quizThunks
-}
-
-/* ======================
-        store
-====================== */
-
-export const store = configureStore({
-  reducer: {
-    quiz: quizReducer,
-    [api.reducerPath]: api.reducer
-  },
-
-  // See middleware tutorial for more info:
-  // https://www.youtube.com/watch?v=dUVXHMHJio0&list=PLC3y8-rFHvwiaOAuTtVXittwybYIorRB3&index=22
-  middleware: (getDefaultMiddleware) => {
-    return getDefaultMiddleware().concat(
-      quizListenerMiddleware.middleware,
-      /* logger, */ api.middleware
-    )
-  }
-})
-
-export type AppDispatch = typeof store.dispatch
-export type RootState = ReturnType<typeof store.getState>
-
-/* ======================
-        Bindings
-====================== */
-// Wrap action creators in dispatch() with bindActionCreators()
-// https://redux-toolkit.js.org/api/other-exports/#bindactioncreators
-// https://redux.js.org/api/bindactioncreators
-// https://www.youtube.com/watch?v=1Hp8ATFL_fc&list=PLC3y8-rFHvwiaOAuTtVXittwybYIorRB3&index=9
-
-const boundActionCreators = bindActionCreators(actionCreators, store.dispatch)
-
 ///////////////////////////////////////////////////////////////////////////
 //
-// ❌ const boundThunks = bindActionCreators(actionCreators, store.dispatch)
+// ⚠️ Important!
+// The docs have a different approach for Next.js in which they create a makeStore()
+// helper that allows them to create a redux store per request. This helps mitigate
+// hydration mismatches, but it's also prevents security concerns.
 //
-// bindActionCreators doesn't preserve the type information for async thunks,
-// which means you lose type info when consuming for methods like unwrap().
+//   https://redux-toolkit.js.org/usage/nextjs
+//   https://redux-toolkit.js.org/usage/nextjs#creating-a-redux-store-per-request
 //
-//   getCategories().unwrap().then( ... ).catch( ... )
+// ❗️ Using a global Redux store singleton (i.e., export const store) is sometimes
+// considered a bad practice, but why? AI:
 //
-// The solution is to manually wrap asyncThunks with store.dispatch().
+//   "Server Concurrency: Next.js servers can serve multiple, independent users at once. If you use a global store,
+//   data from one user/request can appear in another user/request, causing data leaks and security issues."
 //
-//   const boundThunks = {
-//     getCategories: () => store.dispatch(asyncThunks.getCategories())
-//   }
+// What the docs actually say:
 //
-// However, we can also create a bindThunks() helper to do this for us.
-// The trick is to get typescipt to play along. This is where things get complicated,
-// especially because we want to have the correct type hinting with/without .unwrap().
+//   - No global stores - Because the Redux store is shared across requests, it should not
 //
-// ⚠️ AI used for this solution.
+//   - Per-request safe Redux store creation: A Next.js server can handle multiple
+//     requests simultaneously. This means that the Redux store should be created
+//     per request and that the store should not be shared across requests.
+//
+//   -  if you define global variables (like the Redux store) they will be shared across
+//      requests. This is a problem because the Redux store could be contaminated with data from other requests.
+//
+// So... Is it really bad? The security concern is actually only relevant for
+// Server-Side Rendering (SSR), not client-side Redux state. But wait... Isn't
+// react-redux and all its hooks a purely client-side library. Yes. However, the
+// underlying Redux store (from @reduxjs/toolkit or plain redux) is just JavaScript
+// and can run on the server.
+//
+// Conversely, on the client side (in the browser), each user has their own JavaScript
+// context. There's no way for one user's browser Redux state to leak to another user's
+//  browser - they're completely separate environments.
+//
+// Why makeStore() is still recommended:
+//
+//   - SSR Isolation: Creates fresh store instances for each server-side render
+//   - Hydration Consistency: Ensures server and client start with the same initial state
+//   - Clean Architecture: Avoids potential memory leaks in server environments.
+//
+// Conclusion: The security language in the Redux docs is a bit alarmist and
+// overstated. We could technically still use the store singleton approach here.
+// This is a client component after all. However, the mitigation of hydration
+// mismatches is still a major benefit.
 //
 ///////////////////////////////////////////////////////////////////////////
 
-interface AnyAction extends Action {
-  [extraProps: string]: any
-}
+export const makeStore = () => {
+  // https://redux-toolkit.js.org/api/configureStore
+  return configureStore({
+    reducer: {
+      quiz: quizReducer,
 
-// Define the structure that RTK thunks return when dispatched
-type AsyncThunkFulfilledAction<Returned> = PayloadAction<
-  Returned,
-  string,
-  {
-    arg: any
-    requestId: string
-    requestStatus: 'fulfilled'
-  },
-  never
->
+      // https://redux-toolkit.js.org/rtk-query/overview#configure-the-store
+      // Instead of adding individual reducer slices, we
+      // add the generated reducer as a specific top-level slice.
+      [api.reducerPath]: api.reducer
+    },
 
-type AsyncThunkRejectedAction = PayloadAction<
-  undefined,
-  string,
-  {
-    arg: any
-    requestId: string
-    requestStatus: 'rejected'
-    aborted: boolean
-    condition: boolean
-  },
-  SerializedError
->
-
-// The promise that RTK returns with unwrap method
-interface AsyncThunkPromise<Returned>
-  extends Promise<
-    AsyncThunkFulfilledAction<Returned> | AsyncThunkRejectedAction
-  > {
-  unwrap(): Promise<Returned>
-}
-
-// Type for bound thunk
-type BoundThunk<T> =
-  T extends AsyncThunk<infer Returned, infer ThunkArg, any>
-    ? ThunkArg extends void
-      ? () => AsyncThunkPromise<Returned>
-      : (arg: ThunkArg) => AsyncThunkPromise<Returned>
-    : never
-
-// Type to map over all thunks in an object
-type BoundThunks<T extends Record<string, AsyncThunk<any, any, any>>> = {
-  [K in keyof T]: BoundThunk<T[K]>
-}
-
-// Helper function to bind thunks
-export function bindThunks<T extends Record<string, AsyncThunk<any, any, any>>>(
-  asyncThunks: T,
-  dispatch: ThunkDispatch<any, any, AnyAction>
-): BoundThunks<T> {
-  const boundThunks = {} as any
-
-  for (const key in asyncThunks) {
-    if (asyncThunks.hasOwnProperty(key)) {
-      boundThunks[key] = (arg: any) => dispatch(asyncThunks[key](arg))
+    // See middleware tutorial for more info:
+    // https://www.youtube.com/watch?v=dUVXHMHJio0&list=PLC3y8-rFHvwiaOAuTtVXittwybYIorRB3&index=22
+    // https://egghead.io/lessons/redux-refactor-rtk-query-to-use-a-normal-redux-toolkit-store
+    middleware: (getDefaultMiddleware) => {
+      return getDefaultMiddleware().concat(
+        /* logger, */ api.middleware,
+        quizListenerMiddleware.middleware
+      )
     }
-  }
-
-  return boundThunks as BoundThunks<T>
+  })
 }
 
-const boundThunks = bindThunks(asyncThunks, store.dispatch)
-
-/* ======================
-        Hooks
-====================== */
-
-export const useActions = () => {
-  return { ...boundActionCreators, ...boundThunks }
-}
-
-// https://redux.js.org/usage/usage-with-typescript#define-typed-hooks
-// Use throughout your app instead of plain `useDispatch` and `useSelector`
-type DispatchFunc = () => AppDispatch
-
-// Generally, there shouldn't be a need to consume useTypedDispatch(). Instead prefer useActions().
-export const useTypedDispatch: DispatchFunc = useDispatch
-export const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector
-
-/* ======================
-    setupListeners()
-====================== */
-///////////////////////////////////////////////////////////////////////////
-//
-// This is necessary for the implementation of things like:
-//
-//   refetchOnFocus: true,
-//   refetchOnReconnect: true,
-//
-// which may occur in the api slice, or individual query hook configurations.
-// See this Jamund Ferguson video for an example:
-// https://egghead.io/lessons/redux-refetch-data-on-focus-and-reconnect-with-rtk-query-s-setuplisteners
-// https://redux-toolkit.js.org/rtk-query/api/setupListeners
-//
-///////////////////////////////////////////////////////////////////////////
-
-setupListeners(store.dispatch)
+export type AppStore = ReturnType<typeof makeStore>
+export type AppDispatch = AppStore['dispatch']
+export type RootState = ReturnType<AppStore['getState']>

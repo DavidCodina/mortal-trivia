@@ -5,7 +5,7 @@ import {
 } from '@reduxjs/toolkit'
 import { QuizUserAnswer } from '@/types'
 
-import { /* quizApi, RootState, */ api } from '@/redux-store'
+import { RootState, /*, quizApi */ api } from '@/redux-store'
 
 type QuizState = {
   userAnswers: QuizUserAnswer[] | null
@@ -53,8 +53,8 @@ const quizListenerMiddleware = createListenerMiddleware()
 quizListenerMiddleware.startListening({
   actionCreator: quizActions.resetQuiz,
   effect: async (_action, listenerApi) => {
-    // const beforeState = listenerApi.getState() as RootState
-    // console.log('\nbeforeQueries: ', beforeState.api.queries)
+    const beforeState = listenerApi.getState() as RootState
+    console.log('\nbeforeQueries: ', beforeState.api.queries)
     const dispatch = listenerApi.dispatch
 
     ///////////////////////////////////////////////////////////////////////////
@@ -90,8 +90,8 @@ quizListenerMiddleware.startListening({
       })
     )
 
-    // const afterState = listenerApi.getState() as RootState
-    // console.log('\nafterQueries: ', afterState.api.queries)
+    const afterState = listenerApi.getState() as RootState
+    console.log('\nafterQueries: ', afterState.api.queries)
   }
 })
 
