@@ -29,7 +29,6 @@ export const CreateQuizForm = () => {
 
   // Global state
   const categories = useAppSelector((state) => state.quiz.categories)
-  // const categoriesPending = useTypedSelector((state) => state.quiz.categoriesPending)
   const categoriesError = useAppSelector((state) => state.quiz.categoriesError)
   const quizPending = useAppSelector((state) => state.quiz.quizPending)
   const quizError = useAppSelector((state) => state.quiz.quizError)
@@ -246,6 +245,7 @@ export const CreateQuizForm = () => {
           <RadioGroup
             items={amountOptions}
             label='Amount'
+            labelRequired
             name='amount-radios'
             onChange={(value) => {
               setAmount(value)

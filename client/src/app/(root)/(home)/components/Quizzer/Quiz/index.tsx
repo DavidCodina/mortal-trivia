@@ -29,8 +29,8 @@ export const Quiz = () => {
   ====================== */
 
   // Global state
-  // const quizError = useTypedSelector((state) => state.quiz.quizError)
-  // const quizPending = useTypedSelector((state) => state.quiz.quizPending)
+  // const quizError = useAppSelector((state) => state.quiz.quizError)
+  // const quizPending = useAppSelector((state) => state.quiz.quizPending)
   const quiz = useAppSelector((state) => state.quiz.quiz)
   const quizLength = Array.isArray(quiz) ? quiz.length : 0
 

@@ -32,23 +32,6 @@ export const useAppSelector = useSelector.withTypes<RootState>()
 
 export const useAppStore = useStore.withTypes<AppStore>()
 
-///////////////////////////////////////////////////////////////////////////
-//
-// This works by taking the action creators and binding them to dispatch.
-// This way, we don't have to manually import dispatch everywhere when
-// consuming action creators.
-//
-// Note also that Typescript/Redux is smart enough to know what
-// is returned. Thus, you have type safety when consuming.
-//
-//  const { increment, decrement, reset } = useActions()
-//
-// For the most part it seems that RTK Query eliminates the need
-// for useActions() and useTypedSelector(). Why? Because accessing
-// data is done through the RTK Query generated hooks.
-//
-///////////////////////////////////////////////////////////////////////////
-
 export const useBoundActions = () => {
   const { boundActionCreators, boundThunks } =
     React.useContext(InternalReduxContext)
