@@ -1,10 +1,4 @@
-import {
-  createSlice,
-  PayloadAction
-  // createAsyncThunk,
-  // createAction,
-  // createReducer
-} from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { getQuizCategories } from './getQuizCategories'
 import { getQuiz } from './getQuiz'
 import { getQuizResults } from './getQuizResults'

@@ -3,7 +3,7 @@
 import * as React from 'react'
 
 import { cn } from '@/utils'
-import { useTypedSelector } from 'redux-store'
+import { useAppSelector } from '@/hooks'
 import { decodeHtmlEntities } from '@/utils'
 import { QuizQuestion as QuizQuestionType, QuizUserAnswer } from '@/types'
 
@@ -22,8 +22,8 @@ export const QuizQuestion = ({
   question,
   userAnswer
 }: QuizQuestionProps) => {
-  const results = useTypedSelector((state) => state.quiz.results)
-  const resultsPending = useTypedSelector((state) => state.quiz.resultsPending)
+  const results = useAppSelector((state) => state.quiz.results)
+  const resultsPending = useAppSelector((state) => state.quiz.resultsPending)
 
   // The specific result for the particular question.
   const currentResult =

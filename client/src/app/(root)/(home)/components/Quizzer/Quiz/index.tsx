@@ -13,7 +13,7 @@ import {
 
 import { Alert, Button } from '@/components'
 import { decodeHtmlEntities } from '@/utils'
-import { useTypedSelector, useActions } from 'redux-store'
+import { useAppSelector, useBoundActions } from '@/hooks'
 import { QuizQuestion } from './components'
 import { QuizUserAnswer } from '@/types'
 
@@ -22,7 +22,7 @@ import { QuizUserAnswer } from '@/types'
 ======================================================================== */
 
 export const Quiz = () => {
-  const { getQuizResults, setUserAnswers, resetQuiz } = useActions()
+  const { getQuizResults, setUserAnswers, resetQuiz } = useBoundActions()
 
   /* ======================
   Global, Local, Derived State
@@ -31,14 +31,14 @@ export const Quiz = () => {
   // Global state
   // const quizError = useTypedSelector((state) => state.quiz.quizError)
   // const quizPending = useTypedSelector((state) => state.quiz.quizPending)
-  const quiz = useTypedSelector((state) => state.quiz.quiz)
+  const quiz = useAppSelector((state) => state.quiz.quiz)
   const quizLength = Array.isArray(quiz) ? quiz.length : 0
 
-  const resultsError = useTypedSelector((state) => state.quiz.resultsError)
-  const resultsPending = useTypedSelector((state) => state.quiz.resultsPending)
-  const results = useTypedSelector((state) => state.quiz.results)
+  const resultsError = useAppSelector((state) => state.quiz.resultsError)
+  const resultsPending = useAppSelector((state) => state.quiz.resultsPending)
+  const results = useAppSelector((state) => state.quiz.results)
 
-  const isAudio = useTypedSelector((state) => state.quiz.isAudio)
+  const isAudio = useAppSelector((state) => state.quiz.isAudio)
 
   // Local state
   const [localUserAnswers, setLocalUserAnswers] = React.useState<

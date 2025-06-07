@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { Volume, VolumeX } from 'lucide-react'
-import { useTypedSelector, useActions } from 'redux-store'
+import { useAppSelector, useBoundActions } from '@/hooks'
 import { CreateQuizForm } from './CreateQuizForm'
 import { Quiz } from './Quiz'
 
@@ -11,9 +11,9 @@ import { Quiz } from './Quiz'
 ======================================================================== */
 
 export const Quizzer = () => {
-  const { getQuizCategories, toggleIsAudio } = useActions()
-  const quiz = useTypedSelector((state) => state.quiz.quiz)
-  const isAudio = useTypedSelector((state) => state.quiz.isAudio)
+  const { getQuizCategories, toggleIsAudio } = useBoundActions()
+  const quiz = useAppSelector((state) => state.quiz.quiz)
+  const isAudio = useAppSelector((state) => state.quiz.isAudio)
 
   /* ======================
         useEffect()

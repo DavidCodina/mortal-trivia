@@ -5,7 +5,7 @@ import { AlertCircle, ClipboardPlus, Ban } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 
-import { useTypedSelector, useActions } from 'redux-store'
+import { useAppSelector, useBoundActions } from '@/hooks'
 import {
   Alert,
   Button,
@@ -21,24 +21,22 @@ import {
 ======================================================================== */
 
 export const CreateQuizForm = () => {
-  const { getQuiz, getQuizCategories } = useActions()
+  const { getQuiz, getQuizCategories } = useBoundActions()
 
   /* ======================
   Global, Local, Derived State
   ====================== */
 
   // Global state
-  const categories = useTypedSelector((state) => state.quiz.categories)
+  const categories = useAppSelector((state) => state.quiz.categories)
   // const categoriesPending = useTypedSelector((state) => state.quiz.categoriesPending)
-  const categoriesError = useTypedSelector(
-    (state) => state.quiz.categoriesError
-  )
-  const quizPending = useTypedSelector((state) => state.quiz.quizPending)
-  const quizError = useTypedSelector((state) => state.quiz.quizError)
+  const categoriesError = useAppSelector((state) => state.quiz.categoriesError)
+  const quizPending = useAppSelector((state) => state.quiz.quizPending)
+  const quizError = useAppSelector((state) => state.quiz.quizError)
 
-  const quiz = useTypedSelector((state) => state.quiz.quiz)
-  const results = useTypedSelector((state) => state.quiz.results)
-  const isAudio = useTypedSelector((state) => state.quiz.isAudio)
+  const quiz = useAppSelector((state) => state.quiz.quiz)
+  const results = useAppSelector((state) => state.quiz.results)
+  const isAudio = useAppSelector((state) => state.quiz.isAudio)
 
   // Local state
   const [category, setCategory] = React.useState<ReactSelectOption | null>(null)
