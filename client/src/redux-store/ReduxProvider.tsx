@@ -1,13 +1,15 @@
 'use client'
 
 import React, { PropsWithChildren, useRef, createContext } from 'react'
-import { bindActionCreators, Dispatch, Action } from 'redux'
 import { Provider } from 'react-redux'
 import {
   AsyncThunk,
   ThunkDispatch,
   PayloadAction,
-  SerializedError
+  SerializedError,
+  bindActionCreators,
+  Dispatch,
+  Action
 } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 
